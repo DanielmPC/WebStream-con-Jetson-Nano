@@ -7,11 +7,11 @@ from flask import Response, Flask
 global video_frame
 video_frame = None
 
-# Use locks for thread-safe viewing of frames in multiple browsers
+# Usamos thread-safe para ver en varios buscadores
 global thread_lock 
 thread_lock = threading.Lock()
 
-# Object flask
+# Objeto Flask
 app = Flask(__name__)
 
 def captureFrames():
@@ -36,7 +36,7 @@ def captureFrames():
 def encodeFrame():
     global thread_lock
     while True:
-        # Acquire thread_lock to access the global video_frame object
+
         with thread_lock:
             global video_frame
             if video_frame is None:
@@ -45,7 +45,7 @@ def encodeFrame():
             if not return_key:
                 continue
 
-        # Output image as a byte array
+        # Onvertimos la imagen en bytes
         yield(b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + 
             bytearray(encoded_image) + b'\r\n')
 
@@ -53,14 +53,14 @@ def encodeFrame():
 def streamFrames():
     return Response(encodeFrame(), mimetype = "multipart/x-mixed-replace; boundary=frame")
 
-# check to see if this is the main thread of execution
 if __name__ == '__main__':
 
-    # Create a thread and attach the method that captures the image frames, to it
+    # Creación del hilo 
     process_thread = threading.Thread(target=captureFrames)
     process_thread.daemon = True
 
-    # Start the threadcuale
+    # Iniciamos el hilo
     process_thread.start()
 
+    # Iniciamos la API con la IP de la tarjeta 
     app.run(host='10.42.0.1')
